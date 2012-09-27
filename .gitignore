@@ -1,4 +1,6 @@
 *.aux
+logo*.*
+logo_tu.*
 *.bbl
 *.blg
 *.dvi
