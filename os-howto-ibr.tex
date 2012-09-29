@@ -1,0 +1,314 @@
+\documentclass[a4paper,ngerman,bibtotocliststotoc]{scrartcl}
+\usepackage[automark]{scrpage2}
+\pagestyle{scrheadings}
+\usepackage{multicol}
+%\usepackage{multirow}
+\usepackage{graphicx}
+%\usepackage{caption}
+%\usepackage{comment}
+%\usepackage{mathdots}
+%\usepackage{natbib}
+%\usepackage[utf8x]{inputenc}
+%\usepackage
+\renewcommand*{\titlepagestyle}{empty}
+%Mehr Abstand bei Fußnoten
+%Hack von Markus Kohm. Gefunden auf:
+%<http://groups.google.de/group/de.comp.text.tex/msg/6ab39a8c01a6c06b>
+%\newcommand*{\OrigFootnoteRule}{}
+%\let\OrigFootnoteRule=\footnoterule
+%\newcommand*{\semiflushbottom}{%
+%  \raggedbottom%
+%    \renewcommand\footnoterule{%
+%        \vskip 0pt plus .001fil%
+%	    \OrigFootnoteRule}
+%
+%	    } 
+%Ein anderer Hack von Patrick Pommé scheint zu tun
+%<http://groups.google.de/group/de.comp.text.tex/msg/a00556927050e1b1>
+\renewcommand{\footnoterule}{\vspace{0,25cm} \rule{5cm}{0.4pt}
+\vspace{0,25cm}} 
+%\usepackage[bottom]{footmisc}
+\usepackage{comment}
+ \usepackage{lmodern}
+% ersetzen
+% Was soll das bedeuten? Es hat was mit der Encodierung zu tun, aber
+% was? Kann mich jemand aufklären?
+\usepackage[T1]{fontenc}
+% Zeichensatz einstellen
+\usepackage[utf8]{inputenc}
+% Paket für mehrere Sprachen in einen Dokument einbinden
+% Wird für die "neue deutsche Rechtschreibung" benötigt
+\usepackage{babel}
+% Pakete für mathematischen Formelsatz einbinden
+\usepackage{amsmath}
+\usepackage{amssymb}
+% Typographie verbessern
+\usepackage{microtype}
+\usepackage[
+hyperfootnotes=true,
+bookmarks,
+bookmarksopen=true,
+bookmarksnumbered=true,
+colorlinks={false},
+urlcolor={blue},
+linkcolor={blue},
+citecolor={blue},
+pdfstartview={FitH},
+pdfauthor={Johannes Starosta <j.starosta@tu-bs.de>}]{hyperref}
+%\newcommand*{\teil}[1]{\section*{\setcounter{part}{1} \Huge Teil 
+ %   \thepart :  #1}}
+\begin{document}%\
+\input{titelseite}%\newpage
+%\begin{multicols}{1}
+%%\section*{Vorbemerkung}
+%\url{J.Starosta@tu-bs.de}.
+%\tableofcontents 
+%\end{multicols}
+\begin{abstract}
+This document describes how you use and administrate the openstack cloud
+of the Distributed Systems Group at TU Braunschweig. It also describes
+some basic concepts of openstack. \emph{Warning: It's not a replace of
+the official documentation, use with caution!}
+\end{abstract}
+%struktur:
+%einführung komponenten, welche clients
+%Benutzermanagment-Konzepte und Handhabung
+%Zugriff via nova,euca-tools, hyperfox,dashboard
+%Image Erzeugung
+\section{Introduction}
+\label{sec:introduction}
+Openstack consist of five modules, which serves different purposes:
+\begin{itemize}
+\item The Open Stack Compute Infrastructure is provided by the
+  nova-daemon. nova is responsible for:
+  \begin{itemize}
+  \item  Instance life cycle management
+  \item Management of compute resources
+  \item Networking and Authorization
+  \end{itemize}
+It also provides a web service API, which can be used to control the
+instances. It's compatible with the EC2 API of Amazon Web Services and
+can be used by:
+\begin{itemize}
+\item The nova-pythonclient, the euca2ools or any other EC2 compatible
+  client, the Horizon Webinterface of Openstack
+\end{itemize}
+\item The OpenStack Imaging Service  ist provided by the glance
+  daemon. It's used for retrival, lookup and uploading of virtual
+  machine images. It can be accessed via the glance CLI client, any
+  EC2/S3 compatible client and Horizon
+\item OpenStack Object Storage is provided by the Swift daemon. It can
+  be acced by the swift CLI tool, Horizizon oder any Amazon S3 compatible client
+\item OpenStack Identity Service  (Keystone) is used to set up user
+  authentication and authorization. It can be used by using the
+  keystone CLI tool.
+\end{itemize}
+\section{Configuring users and their permissions with the Openstack
+  Identity Service (Keystone)}
+
+\subsection{Basic concepts: Users, tenants and roles}
+\label{sec:basic-conc-users}
+There are three main concepts of Identity user management are in Openstack:
+\begin{itemize}
+\item Users: Represents a human user (e.g. Alice,Bob) and has associated
+  information such as usernae, password and email
+\item Tenants: A tenant can be thought of as a project, group, or
+  organization (e.G: group1,IBR...) 
+\item Roles: A role captures what operations a user is permitted to
+  perform in a given tenant.  A user can have different roles in
+  different tenants. Here is an example: Imagine the users Alice and
+  Bob. Both are members of the tenant IBR, as well as of the tenant
+  group1. Now see their roles:\\
+  \begin{center}
+  \begin{tabular}{c|c|c}
+    User & Tenant & Role  \tabularnewline \hline
+    Alice &IBR& admin \tabularnewline \hline
+    Bob &IBR&Member  \tabularnewline \hline
+    Alice&group1&Member \tabularnewline \hline
+    Bob&group1&Member
+  \end{tabular}  
+  \end{center}
+  Alice has the role ,,admin'' of the  tenant ,,IBR'' while
+  Bob has the role ,,users''. In the tenant ,,group1'' Alice and Bob
+  are have the role ''users''. Please note, that ,,admin'' and
+  ,,users' are just names, unless you define the permission polices of a
+  certain role. The currenty installed police on the Openstack Cloud
+  at IBR just defines the roles ,,admin'' and ,,swiftoperator''.
+  A user need to have the role ,,admin'' to do some administrative tasks (e.G: Creating
+  users...), which should not be allowed for normal users. If a user
+  should be given access to the swift object storage service, he
+  should get the role ,,swiftoperator''.\\
+Note: A user can have several roles for the same tenant:
+\begin{center}
+  \begin{tabular}{c|c|c}
+    User & Tenant & Role  \tabularnewline \hline
+    Bob &IBR&Member \tabularnewline \hline
+    Bob & IBR&swiftoperator%\tabularnewline 
+  \end{tabular}  
+  \end{center}
+ For further information see %TODO: chapter 6, seite 76 of OS compute
+                             %administration essex
+                             % \item 
+\end{itemize}
+
+\subsection{Creating and managing users, tenants and roles}
+\label{sec:creat-manag-users}
+Now we want to create an user. Given is following scenario:\\
+Alice and Bob are students of Eve. Alice and Bob participates in Eves
+cloud computing lab. So Eve wants them to work together on a shared
+project. They should be able to create custom images, upload them and
+run their own cloud instances (thus they need access to compute and
+glance). They also should use Swift Object Storage, so they can upload
+their documentation to an Object Storage container. Eve decides to
+create a tenant ,,cclab-group1'' for them. Eve wants to have acces to
+the tenants instances as well. She also wants to 
+have access to the
+tenant as well and she wants, administrative permissions, while Alice and Bob shall be
+just normal users... So she want to create following
+setup:
+
+\begin{center}
+  \begin{tabular}{ccc}
+    User & Tenant & Role\\
+    Alice&cclab-group1&Member\\
+    Bob  &cclab-group1&Member\\
+    Alice&cclab-group1&swiftoperator\\
+    Bob  &cclab-group1&swiftoperator\\
+    Eve  &cclab-group1&admin\\
+  \end{tabular}
+\end{center}
+\fbox{\parbox{\textwidth
+  }{\begin{center}\LARGE{\textbf{WARNING:}}\end{center}
+\emph{The environment on
+  cloud2 is configured to do administrative tasks. Don't use it to do
+  things, you want to use with a certain user! For example if you
+  create an virtual machine instance as user ,,admin'', you won't be
+  able to access it from your normal user account. In %TODO reference
+                                %to usage chapter
+  we'll discuss how to access your user environment without messing up
+  with the admin account.}}}% \hfill
+
+She connects to \verb|cloud2.ibr.cs.tu-bs.de| and run following
+commands in the admin console\footnote{These are NOT real data
+  ids. Don't use them in the real world!}
+\begin{verbatim}
+# Every line, which starts with a # is a comment
+# First she wants to know, which users, roles and tenants alreday
+#exists
+eve@uncinus:~$ keystone user-list
++----------------------------------+---------+-------------------------+-----------+
+|                id                | enabled |          email          |    name   |
++----------------------------------+---------+-------------------------+-----------+
+| 1f53b11a2e0e40239b25961380472c54 |   True  |  admin@ibr.cs.tu-bs.de  |   swift   |
+| 552bfa0c2d6847b6a8ea2625bff5531f |   True  |  admin@ibr.cs.tu-bs.de  |   glance  |
+| cfb1870fc4c84a56bd1f19a5e577d984 |   True  |  admin@ibr.cs.tu-bs.de  |    nova   |
+| dd69242cbdb243dd803b7641c223adb4 |   True  |  admin@ibr.cs.tu-bs.de  |   admin   |
+| eveIDint                         |   True  |   eve@ibr.cs.tu-bs.de   |    eve    |
++----------------------------------+---------+-------------------------+-----------+
+eve@uncinus:~$
+eve@uncinus:~$ keystone tenant-list
++----------------------------------+----------+---------+
+|                id                |   name   | enabled |
++----------------------------------+----------+---------+
+| 0b6336de185a4f01a59fcb5ef9f40d96 | service  |   True  |
+| 9f4b31c709b2431b972666100cf12c79 |  users   |   True  |
+| fa188ad427e24bb6b14b4945fc6af6da |  admin   |   True  |
++----------------------------------+----------+---------+
+eve@uncinus:~$ keystone role-list
++----------------------------------+---------------+
+|                id                |      name     |
++----------------------------------+---------------+
+| 2a292fb8580e49c095059a7b258b57f3 | swiftoperator |
+| 45649d6a8b044f1d860905a896b3473b |     Member    |
+| 47870520359d4f6b9d5d87a175a2f1f1 |     admin     |
++----------------------------------+---------------+
+eve@uncinus:~$
+# We already have all needed roles, eve still need to create the
+# users, tenant and assign them to the needed roles
+eve@uncinus:~$ keystone user-create --name bob --email bob@ibr.cs.tu-bs.de --pass bobpass
++----------+-------------------------------------------------------------------------------------------------------------------------+
+| Property |                                                          Value                                                          |
++----------+-------------------------------------------------------------------------------------------------------------------------+
+|  email   |                                                   bob@ibr.cs.tu-bs.de                                                   |
+| enabled  |                                                           True                                                          |
+|    id    |                                                        bobsIDint                                                           |
+|   name   |                                                           bob                                                           |
+| password | $6$rounds=40000$0p.sAOcBsq8ms/Sk$B/yUdMQoxAwpM8kB1RwyHuL.mYrLI/BZZxlrDeT1U.Rm6QfmBn5/MA86KcBHz90Hr67bOV8EGdfUbOkJ0JwBW. |
+| tenantId |                                                           None                                                          |
++----------+-------------------------------------------------------------------------------------------------------------------------+
+eve@uncinus:~$ keystone user-create --name alice --email alice@ibr.cs.tu-bs.de --pass alicepass
++----------+-------------------------------------------------------------------------------------------------------------------------+
+| Property |                                                          Value                                                          |
++----------+-------------------------------------------------------------------------------------------------------------------------+
+|  email   |                                                 alice@ibr.cs.tu-bs.de                                                   |
+| enabled  |                                                           True                                                          |
+|    id    |                                                        aliceIDint                                                       |
+|   name   |                                                         alice                                                           |
+| password | $6$rounds=40000$0p.sAOcBsq8ms/Sk$B/yUdMQoxAwpM8kB1RwyHuL.mYrLI/BZZxlrDeT1U.Rm6QfmBn5/MA86KcBHz90Hr67bOV8EGdfUbOkJ0JwBW. |
+| tenantId |                                                           None                                                          |
++----------+-------------------------------------------------------------------------------------------------------------------------+
+#now eve creates the tenant
+eve@uncinus:~$ keystone tenant-create  --name cclab-group1
++-------------+----------------------------------+
+|   Property  |              Value               |
++-------------+----------------------------------+
+| description |               None               |
+|   enabled   |               True               |
+|      id     | 898daab4fc4d45b98f231872241458e4 |
+|     name    |           cclab-group1           |
++-------------+----------------------------------+
+eve@uncinus:~$ 
+# at the end we assign the needed roles to every user
+#eve got role admin
+eve@uncinus:~$ keystone user-role-add --user eveIDint  --role 47870520359d4f6b9d5d87a175a2f1f1 --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$
+#bob and alice got the role Member
+eve@uncinus:~$ keystone user-role-add --user bobIDint    --role 45649d6a8b044f1d860905a896b3473b --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-add --user aliceIDint  --role 45649d6a8b044f1d860905a896b3473b --tenant_id 898daab4fc4d45b98f231872241458e4
+#bob and alice got the role swiftoperator
+eve@uncinus:~$ keystone user-role-add --user bobIDint    --role 2a292fb8580e49c095059a7b258b57f3 --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-add --user aliceIDint  --role 2a292fb8580e49c095059a7b258b57f3 --tenant_id 898daab4fc4d45b98f231872241458e4
+\end{verbatim}
+Now everything ist configured. Of course Eve could have add additional
+roles or more tenants. More information how to do identify managment
+can be found in %For background information refer to
+% FIXME referenz einfügen.
+
+\subsection{Updating user information}
+\label{sec:updat-user-inform}
+You might want to change details of the users. Again we look in our
+scenario:
+Bob complains, that he can't remember his password. He prefers to have
+the password "swordfish". He also would prefered to have another email
+(bob@tu-bs.de) in the user-details.
+Again Eve connects to \verb|clou2.ibr.cs.tu-bs.de|:
+\begin{verbatim}
+eve@uncinus:~$
+eve@uncinus:~$ keystone user-update --email bob@tu-bs.de bobIDint
+eve@uncinus:~$ keystone user-password-update --pass swordfish bobIDint
+\end{verbatim}
+You can change the details of names and roles as well. Please refer to
+% FIXME
+
+\subsection{Removing everything}
+\label{sec:removing-everything}
+Now the term is finished. Alice and Bob have finished their project and
+passed the examination. Eve now wants to removes their user-account,
+tenant, since the Cloud will be needed for new students next term:
+\begin{verbatim}
+#first eve remove the roles from the tenant
+eve@uncinus:~$ keystone user-role-remove --user eveIDint    --role 47870520359d4f6b9d5d87a175a2f1f1 --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-remove --user bobIDint    --role 45649d6a8b044f1d860905a896b3473b --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-remove --user aliceIDint  --role 45649d6a8b044f1d860905a896b3473b --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-remove --user bobIDint    --role 2a292fb8580e49c095059a7b258b57f3 --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-remove --user aliceIDint  --role 2a292fb8580e49c095059a7b258b57f3 --tenant_id 898daab4fc4d45b98f231872241458e4
+# now we remove the tenant:
+eve@uncinus:~$ keystone tenant-delete  898daab4fc4d45b98f231872241458e4
+# and in the end the accounts of alice and bob
+eve@uncinus:~$ keystone user-delete aliceIDint
+eve@uncinus:~  keystone user-remove bobIDint
+\end{verbatim}
+%\newpage
+%\begin{multicols}{2}
+
+\end{document}
