@@ -1,9 +1,11 @@
-\documentclass[a4paper,ngerman,bibtotocliststotoc]{scrartcl}
+\documentclass[a4paper,bibtotoc,english,liststotoc]{scrartcl}
 \usepackage[automark]{scrpage2}
 \pagestyle{scrheadings}
 \usepackage{multicol}
 %\usepackage{multirow}
 \usepackage{graphicx}
+\usepackage[style=authortitle-tcomp]{biblatex}
+\bibliography{cloudlit}
 %\usepackage{caption}
 %\usepackage{comment}
 %\usepackage{mathdots}
@@ -69,6 +71,7 @@ of the Distributed Systems Group at TU Braunschweig. It also describes
 some basic concepts of openstack. \emph{Warning: It's not a replace of
 the official documentation, use with caution!}
 \end{abstract}
+\tableofcontents
 %struktur:
 %einführung komponenten, welche clients
 %Benutzermanagment-Konzepte und Handhabung
@@ -439,7 +442,7 @@ ID                                   Name                           Disk Format 
 3d183184-5fa7-475e-bacd-6e78c5e8c245 test                            qcow2                ovf                       230490112
 \end{verbatim}
 
-\subsection{Create a public keypair}
+\subsubsection{Create a public keypair}
 \label{sec:create-publ-keyp}
 We need to create a public keypair. It's used to provide ssh access to
 UNIX images.
@@ -630,8 +633,7 @@ $ euca-describe-instances
 # terminate instance
 $ euca - terminate - instances < instanz_id >
 \end{verbatim}
-Note: This is NOT a complete guide, please refer to the euca2ools
-guide \cite{eucatools} on \url{http://open.eucalyptus.com/wiki/Euca2oolsGuide}.
+Note: This is NOT a complete guide, please refer to the \cite{eucatools}.% on \url{http://open.eucalyptus.com/wiki/Euca2oolsGuide}.
 \subsection{Configuring and using Hybridfox}
 \label{sec:conf-hybr}
 Hybridfox is a Firefox Add-On, which provides a GUI for several tasks
@@ -650,12 +652,26 @@ Now we setup the credentials:
   \includegraphics{hybrid_creds}
 \end{center}
 Setting up images and instances is quite easy. More information
-concerning this, can be found in the the Hybridfox User Manual \cite{hybridfoxMan}
-\url{http://hybridfox.googlecode.com/files/Hybridfox_User_Manual_v1.pdf}
+concerning this, can be found in the \cite{hybridfoxMan}.
+%\url{http://hybridfox.googlecode.com/files/Hybridfox_User_Manual_v1.pdf}
 
 \section{Creating images}
 \label{sec:creating-images}
 When we introduced the ,,glance'' command line tool for uploading
-images, we didn't explain how to 
+images, we didn't explain how to create images for use with the
+virtual machine. The principle is always the same: You create a disk
+image and use an emulator (e.G. Virtualbox, qemu, kvm etc) to install
+an operating system. Details how to accomplish this on  the different Linux
+distributions and Windows can be found in chapter 3 ,,Image
+Managment'' of the \cite{starterguide}. However one thing is important:
+You need to be beware, that you can only use an emulator whose image
+format is supported by glance. At the moment, glance support raw
+images, the VHD format used by VMWare, Xen, Microsoft, VirtualBox,
+vmdk, vdi used by qemu and VirtualBox, qcow2 of qemu and aki, ami and
+ari of amazon.
 
+%\bibliographystyle{plain}
+\newpage
+\printbibliography
+ 
 \end{document}
