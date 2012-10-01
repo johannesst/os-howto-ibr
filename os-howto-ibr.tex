@@ -59,11 +59,10 @@ pdfauthor={Johannes Starosta <j.starosta@tu-bs.de>}]{hyperref}
  %   \thepart :  #1}}
 \begin{document}%\
 \input{titelseite}%\newpage
-%\begin{multicols}{1}
-%%\section*{Vorbemerkung}
-%\url{J.Starosta@tu-bs.de}.
-%\tableofcontents 
-%\end{multicols}
+%      \subject{TU Braunschweig\\IBR/Distributed Systems}
+%      \title{Configuring and using the openstack cloud at IBR}
+%\author{Johannes Starosta}
+%\maketitle
 \begin{abstract}
 This document describes how you use and administrate the openstack cloud
 of the Distributed Systems Group at TU Braunschweig. It also describes
@@ -146,7 +145,7 @@ Note: A user can have several roles for the same tenant:
     Bob & IBR&swiftoperator%\tabularnewline 
   \end{tabular}  
   \end{center}
- For further information see %TODO: chapter 6, seite 76 of OS compute
+ For further information see Chapter 6, site 76 of \cite{computeadmin}.%TODO: chapter 6, seite 76 of OS compute
                              %administration essex
                              % \item 
 \end{itemize}
@@ -177,15 +176,22 @@ setup:
     Eve  &cclab-group1&admin\\
   \end{tabular}
 \end{center}
+
+\label{warning}
+\label{sec:creat-manag-users-1}
+
+
 \fbox{\parbox{\textwidth
   }{\begin{center}\LARGE{\textbf{WARNING:}}\end{center}
 \emph{The environment on
   cloud2 is configured to do administrative tasks. Don't use it to do
   things, you want to use with a certain user! For example if you
   create an virtual machine instance as user ,,admin'', you won't be
-  able to access it from your normal user account. In %TODO reference
+  able to access it from your normal user account. In section
+  \ref{sec:using-comp-infr} %TODO reference
+                                %to usage chapter} %TODO reference
                                 %to usage chapter
-  we'll discuss how to access your user environment without messing up
+   we'll discuss how to access your user environment without messing up
   with the admin account.}}}% \hfill
 
 She connects to \verb|cloud2.ibr.cs.tu-bs.de| and run following
@@ -225,7 +231,8 @@ eve@uncinus:~$ keystone role-list
 eve@uncinus:~$
 # We already have all needed roles, eve still need to create the
 # users, tenant and assign them to the needed roles
-eve@uncinus:~$ keystone user-create --name bob --email bob@ibr.cs.tu-bs.de --pass bobpass
+eve@uncinus:~$ keystone user-create --name bob --email bob@ibr.cs.tu-bs.de 
+                                    --pass bobpass
 +----------+-------------------------------------------------------------------------------------------------------------------------+
 | Property |                                                          Value                                                          |
 +----------+-------------------------------------------------------------------------------------------------------------------------+
@@ -260,18 +267,27 @@ eve@uncinus:~$ keystone tenant-create  --name cclab-group1
 eve@uncinus:~$ 
 # at the end we assign the needed roles to every user
 #eve got role admin
-eve@uncinus:~$ keystone user-role-add --user eveIDint  --role 47870520359d4f6b9d5d87a175a2f1f1 --tenant_id 898daab4fc4d45b98f231872241458e4
-eve@uncinus:~$
+eve@uncinus:~$ keystone user-role-add --user eveIDint  
+                        --role 47870520359d4f6b9d5d87a175a2f1f1 
+                       --tenant_id 898daab4fc4d45b98f231872241458e4
 #bob and alice got the role Member
-eve@uncinus:~$ keystone user-role-add --user bobIDint    --role 45649d6a8b044f1d860905a896b3473b --tenant_id 898daab4fc4d45b98f231872241458e4
-eve@uncinus:~$ keystone user-role-add --user aliceIDint  --role 45649d6a8b044f1d860905a896b3473b --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-add --user bobIDint 
+                        --role 45649d6a8b044f1d860905a896b3473b 
+                       --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-add --user aliceIDint 
+                        --role 45649d6a8b044f1d860905a896b3473b 
+                       --tenant_id 898daab4fc4d45b98f231872241458e4
 #bob and alice got the role swiftoperator
-eve@uncinus:~$ keystone user-role-add --user bobIDint    --role 2a292fb8580e49c095059a7b258b57f3 --tenant_id 898daab4fc4d45b98f231872241458e4
-eve@uncinus:~$ keystone user-role-add --user aliceIDint  --role 2a292fb8580e49c095059a7b258b57f3 --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-add --user bobIDint    
+                       --role 2a292fb8580e49c095059a7b258b57f3 
+                       --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-add --user aliceIDint  
+                       --role 2a292fb8580e49c095059a7b258b57f3 
+                       --tenant_id 898daab4fc4d45b98f231872241458e4
 \end{verbatim}
 Now everything ist configured. Of course Eve could have add additional
 roles or more tenants. More information how to do identify managment
-can be found in %For background information refer to
+can be found in chapter 6 of \cite{computeadmin}%For background information refer to
 % FIXME referenz einfügen.
 
 \subsection{Updating user information}
@@ -279,7 +295,7 @@ can be found in %For background information refer to
 You might want to change details of the users. Again we look in our
 scenario:
 Bob complains, that he can't remember his password. He prefers to have
-the password "swordfish". He also would prefered to have another email
+the password ,,swordfish''. He also would prefered to have another email
 (bob@tu-bs.de) in the user-details.
 Again Eve connects to \verb|clou2.ibr.cs.tu-bs.de|:
 \begin{verbatim}
@@ -287,7 +303,7 @@ eve@uncinus:~$
 eve@uncinus:~$ keystone user-update --email bob@tu-bs.de bobIDint
 eve@uncinus:~$ keystone user-password-update --pass swordfish bobIDint
 \end{verbatim}
-You can change the details of names and roles as well. Please refer to
+You can change the details of names and roles as well. 
 % FIXME
 
 \subsection{Removing everything}
@@ -297,18 +313,349 @@ passed the examination. Eve now wants to removes their user-account,
 tenant, since the Cloud will be needed for new students next term:
 \begin{verbatim}
 #first eve remove the roles from the tenant
-eve@uncinus:~$ keystone user-role-remove --user eveIDint    --role 47870520359d4f6b9d5d87a175a2f1f1 --tenant_id 898daab4fc4d45b98f231872241458e4
-eve@uncinus:~$ keystone user-role-remove --user bobIDint    --role 45649d6a8b044f1d860905a896b3473b --tenant_id 898daab4fc4d45b98f231872241458e4
-eve@uncinus:~$ keystone user-role-remove --user aliceIDint  --role 45649d6a8b044f1d860905a896b3473b --tenant_id 898daab4fc4d45b98f231872241458e4
-eve@uncinus:~$ keystone user-role-remove --user bobIDint    --role 2a292fb8580e49c095059a7b258b57f3 --tenant_id 898daab4fc4d45b98f231872241458e4
-eve@uncinus:~$ keystone user-role-remove --user aliceIDint  --role 2a292fb8580e49c095059a7b258b57f3 --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-remove --user eveIDint    
+                       --role 47870520359d4f6b9d5d87a175a2f1f1 
+                       --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-remove --user bobIDint    
+                       --role 45649d6a8b044f1d860905a896b3473b 
+                       --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-remove --user aliceIDint  
+                       --role 45649d6a8b044f1d860905a896b3473b 
+                       --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-remove --user bobIDint    
+                       --role 2a292fb8580e49c095059a7b258b57f3 
+                       --tenant_id 898daab4fc4d45b98f231872241458e4
+eve@uncinus:~$ keystone user-role-remove --user aliceIDint  
+                       --role 2a292fb8580e49c095059a7b258b57f3 
+                       --tenant_id 898daab4fc4d45b98f231872241458e4
 # now we remove the tenant:
 eve@uncinus:~$ keystone tenant-delete  898daab4fc4d45b98f231872241458e4
 # and in the end the accounts of alice and bob
 eve@uncinus:~$ keystone user-delete aliceIDint
 eve@uncinus:~  keystone user-remove bobIDint
 \end{verbatim}
+%TODO Referenz 
 %\newpage
 %\begin{multicols}{2}
+
+\section{Using the compute infrastructure}
+\label{sec:using-comp-infr}
+
+As already mentioned in \ref{warning} you should not use
+the environment of the admin user to create new images or
+instances. Instead you should connect from a client. You can connect
+via the native openstack client tools(nova-pythonclient,glance,swift etc), any EC2-compatible tool, the HybridFox
+Firefox Plugin or the Horizon Dashboard. We will describe now how to
+configure the clients, before describing how to use them.\\
+\subsection{Configuring the native tools}
+\label{sec:conf-nova-pyth}
+Open a web browser and connect to
+\url{http://cloud2.ibr.cs.tu-bs.de}. You should see the login page of
+the Horizon dasboard. Login with your username and password
+(e.G. Alice, alicepass). Open the subpage ,,Settings''. Open
+,,OpenStack Credentials''. Select the project you want to work on and
+click ,,Download RC file''. The browser will start do download a file,
+called \verb|openrc.sh|. The native tools are configured  by setting
+environment variables, e.G. ,,OS\_PASSWORD''.  Thus, you need to source
+the file ,,openrc.sh'' before you can use the native tools:
+\begin{verbatim}
+# source openrc.sh
+alice@izcip01:~$ source openrc.sh
+Please enter your OpenStack Password:
+alice@izcip01:~$
+\end{verbatim}
+If you don't like the idea of always retyping the password, open
+\verb|openrc.sh| in your favourite text editor and change the last lines
+to look like this:
+\begin{verbatim}
+# With Keystone you pass the keystone password.
+#echo "Please enter your OpenStack Password: "
+#read -s OS_PASSWORD_INPUT
+#export OS_PASSWORD=$OS_PASSWORD_INPUT
+export OS_PASSWORD=yourpassword
+\end{verbatim}
+However you still need to source \verb|openrc.sh| everytime you want to
+access the cloud. If you have enough of it, you can configure your
+UNIX shell, to source \verb|openrc.sh| every time you login to your
+UNIX account:
+\begin{verbatim}
+# First change openrc.sh like described above, so you not getting asked
+# for the password
+# Make sure, that openrc.sh can be found by the shell:
+alice@izcip01:~$ mv openrc.sh .novarc
+# open the file .bashrc in your home directory in your favourite text
+# editor and add following line to it
+source ~/.novarc
+#logout and login again, to activate the changes
+#test it
+alice@izcip01:~$ nova absolute-limits
++--------------------+-------+
+|        Name        | Value |
++--------------------+-------+
+|    maxImageMeta    |  128  |
+|   maxPersonality   |   5   |
+| maxPersonalitySize | 10240 |
+|   maxServerMeta    |  128  |
+|   maxTotalCores    |   20  |
+| maxTotalInstances  |   10  |
+|  maxTotalRAMSize   | 51200 |
++--------------------+-------+
+\end{verbatim}
+Now you should be able to use the native tools every time you login to
+your UNIX-account.
+\subsection{Creating and running instances}
+\label{sec:creat-runn-inst}
+We need to do following steps, to get a cloud instance to work:
+\begin{enumerate}
+\item Create and upload a virtual machine image
+\item Create a public keypair
+\item Run a virtual machine instance
+\item Assign a public IP Address to the instance (optional)
+\end{enumerate}
+Please note, that although step 4 is optional, in reality the virtual machine is nearly useless without
+a public IP. Without a public IP, the services provided by the virtual
+machine, can not be accessed. 
+
+\subsubsection{Uploading virtual machine images}
+\label{sec:create-uplo-virt}
+Since the creation of virtual machine images is quite complex, I put
+the details in a seperate section \ref{sec:creating-images} on page
+\pageref{sec:creating-images}. So let's assume you have already created an
+image or just downloaded one of the ready Images from
+\url{http://cloud-images.ubuntu.com/}. 
+To add the image test.img to the cloud we upload it using the glance
+command line tool:
+\begin{verbatim}
+alice@izcip01:~$ glance add disk_format=qcow2  container_format=ovf name="test" <test.img
+=====================[100%] 145.932926M/s, ETA  0h  0m  0s
+Added new image with ID: 3d183184-5fa7-475e-bacd-6e78c5e8c245
+# note: disk_format shall be in the image format of the uploaded
+# image, container_format is the format, which openstack will use to
+# store. More information is provided in the section about creating images
+alice@izcip01:~$
+alice@izcip01:~$ glance index 
+ID                                   Name                           Disk Format          Container Format     Size          
+------------------------------------ ------------------------------ -------------------- -------------------- --------------
+3d183184-5fa7-475e-bacd-6e78c5e8c245 test                            qcow2                ovf                       230490112
+\end{verbatim}
+
+\subsection{Create a public keypair}
+\label{sec:create-publ-keyp}
+We need to create a public keypair. It's used to provide ssh access to
+UNIX images.
+\begin{verbatim}
+alice@izcip01:~$ ssh-keygen 
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/alice/.ssh/id_rsa):
+Your public key has been saved in dd.pub.
+The key fingerprint is:
+d6:e2:37:41:02:76:4b:9f:53:e6:f9:a7:36:65:8b:e4 jstarosta@uncinus
+The key's randomart image is:
++--[ RSA 2048]----+
+|      o o   o    |
+|     . + o = .   |
+|        o = o    |
+|         + . .   |
+|        S o  .. +|
+|       o . .o .=.|
+|        . o  E+. |
+|         . . . . |
+|                 |
++-----------------+
+alice@izcip01:~$ nova keypair-add --pub_key .ssh/id_rsa.pub cloudkey
+alice@izcip01:~$ nova keypair-list
++----------+-------------------------------------------------+
+|   Name   |                   Fingerprint                   |
++----------+-------------------------------------------------+
+| cloudkey | c2:df:5d:2d:ce:a6:64:af:08:64:fa:9a:c5:9f:27:19 |
++----------+-------------------------------------------------+
+\end{verbatim}
+\subsubsection{Run a virtual machine instance}
+\begin{verbatim}
+alice@izcip01:~$ nova boot --flavor m1.tiny --image 3d183184-5fa7-475e-bacd-6e78c5e8c245 --key_name cloudkey "testinstance"
++------------------------+--------------------------------------+
+|        Property        |                Value                 |
++------------------------+--------------------------------------+
+| OS-DCF:diskConfig      | MANUAL                               |
+| OS-EXT-STS:power_state | 0                                    |
+| OS-EXT-STS:task_state  | scheduling                           |
+| OS-EXT-STS:vm_state    | building                             |
+| accessIPv4             |                                      |
+| accessIPv6             |                                      |
+| adminPass              | zS335ooJBMT4                         |
+| config_drive           |                                      |
+| created                | 2012-10-01T04:12:14Z                 |
+| flavor                 | m1.tiny                              |
+| hostId                 |                                      |
+| id                     | 24d96fdd-55c2-4440-b096-f31aaa148966 |
+| image                  | bla                                  |
+| key_name               | cloudkey                             |
+| metadata               | {}                                   |
+| name                   | testinstance                         |
+| progress               | 0                                    |
+| status                 | BUILD                                |
+| tenant_id              | fa188ad427e24bb6b14b4945fc6af6da     |
+| updated                | 2012-10-01T04:12:14Z                 |
+| user_id                | dd69242cbdb243dd803b7641c223adb4     |
++------------------------+--------------------------------------+
+#get a coffe, building the virtual machine take some time
+alice@izcip01:~$ nova list
++--------------------------------------+-----------------+--------+-------------------------------------+
+|                  ID                  |       Name      | Status |               Networks              |
++--------------------------------------+-----------------+--------+-------------------------------------+
+| 24d96fdd-55c2-4440-b096-f31aaa148966 | testinstance    | ACTIVE | private=192.168.4.37                |
++--------------------------------------+-----------------+--------+-------------------------------------+
+\end{verbatim}
+\subsubsection{Assign a public IP Address to the instance}
+A new virtual machine instance get's automatically a private IP from
+the subnet 192.168.4.2/27 It's used for communication with other
+instances and the hypervisor. However if we want to access a certain
+instance from other servers, it needs to get a public IP assigned. 
+The IBR network has a subnet 134.169.35.2/27 which provides a pool of
+public IPs for openstack:
+\begin{verbatim}
+# allocate a floating-ip from the pool
+alice@izcip01:~$ nova floating-ip-create
++---------------+-------------+----------+------+
+|       Ip      | Instance Id | Fixed Ip | Pool |
++---------------+-------------+----------+------+
+| 134.169.35.12 | None        | None     | nova |
++---------------+-------------+----------+------+
+#assign floating ip to the virtual machine instance with name "testinstance"
+lice@izcip01: ~$ nova add-floating-ip testinstance 134.169.35.12
+jstarosta@uncinus:~$ nova list
++--------------------------------------+-----------------+--------+-------------------------------------+
+|                  ID                  |       Name      | Status |               Networks              |
++--------------------------------------+-----------------+--------+-------------------------------------+
+| 24d96fdd-55c2-4440-b096-f31aaa148966 | testinstance    | ACTIVE | private=192.168.4.37, 134.169.35.12 |
++--------------------------------------+-----------------+--------+-------------------------------------+
+# allow ssh and pings to the instance
+alice@izcip01:~$ nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
+alice@izcip01:~$ nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
+
+\end{verbatim}
+\subsubsection{Terminating instances and cleanup the environment}
+At some point you'll propably want to deassign public IP, terminate
+instances or remove images.
+To remove a public IP from a certain instance (e.G. to use it with
+another one):
+\begin{verbatim}
+alice@izcip01:~$ nova remove-floating-ip testinstance 134.169.35.12
+\end{verbatim}
+To deassociate a public IP (e.G if the users run out of them):
+\begin{verbatim}
+alice@izcip01:~$ nova floating-ip-delete  134.169.35.12
+\end{verbatim}
+Terminate and delete an instance:
+\begin{verbatim}
+alice@izcip01:~$ nova delete testinstance
+# if you have more than one instance with the same name 
+# use nova delete serverId (as printed from nova list)
+\end{verbatim}
+Remove an obsolete image:
+\begin{verbatim}
+alice@izcip01:~$ glance index
+ID                                   Name                           Disk Format          Container Format     Size          
+------------------------------------ ------------------------------ -------------------- -------------------- --------------
+3d183184-5fa7-475e-bacd-6e78c5e8c245 bla                            qcow2                ovf                       230490112
+alice@izcip01:~$ glance delete 3d183184-5fa7-475e-bacd-6e78c5e8c245
+Delete image 3d183184-5fa7-475e-bacd-6e78c5e8c245? [y/N] y
+Deleted image 3d183184-5fa7-475e-bacd-6e78c5e8c245
+\end{verbatim}
+\subsection{Configuring the euca2ools}
+\label{sec:conf-euca2}
+Using the native tools is fine, there is however a problem: In the
+workstation pool of the Braunschweig Computer Science center (roomz
+IZG40) they are not installed, only the euca2ools. It's not a big
+deal, since Openstack is compatible with the EC2 API. We just need to
+to some preparing work.\\\\
+Open a web browser and connect to
+\url{http://cloud2.ibr.cs.tu-bs.de}. You should see the login page of
+the Horizon dasboard. Login with your username and password
+(e.G. Alice, alicepass). Open the subpage ,,Settings''. Open
+,,OpenStack Credentials''. Select the project you want to work on and
+click ,,Download RC file''. The browser will start do download a
+ZIP-Archive with a random name. Now open a shell and type following
+commands:
+\begin{verbatim}
+alice@izcip01:~$ mkdir ~/.euca
+alice@izcip01:~$ cd ~/.euca
+alice@izcip01:~$ unzip pathto_archiv.zip
+alice@izcip01:~$ mv ec2rc.sh eucarc
+# euca2ools need S3_URL, which is not defined 
+# (Openstack Bug https://bugs.launchpad.net/horizon/+bug/987678)
+alice@izcip01:~$ echo "export S3_URL=http://cloud2.ibr.cs.tu-bs.de:3333" >>eucarc
+#source eucarc automatically at the login
+alice@izcip01:~$ echo "source ~/.euca/eucarc" >>~/.bashrc
+#test the setup
+alice@izcip01:~$ euca-describe-regions
+REGION  nova    http://cloud2.ibr.cs.tu-bs.de:8773/services/Cloud
+\end{verbatim}
+
+\subsection{Creating and running instances with the euca2ools}
+\label{sec:creat-runn-inst-ec2}
+Warning: This is just a short description, taken from Johannes Behls
+and Klaus Stengels slides for the Cloud Computing Lecture in summer
+ter 2012. It's not complete!
+
+\subsubsection{Preparing the virtual machine image}
+\label{sec:prep-virt-mach}
+
+
+\begin{verbatim}
+# create an image  image.raw as described 
+# creating the VM-Package (Bundle)                                 "
+$ euca - bundle -image -i image.raw -d . --arch i386
+# sent VM-Package to OPenstackCloud
+# note: The Bucketname doesn't really matter, pick one you like :)
+$ euca-upload-bundle -b  <bucket_name> -m image.raw.manifest.xml
+# Register the bundle
+$ euca-register <bucket_name>/image.raw.manifest.xml 
+# List own, registred VM bundles
+$ euca-describe-images -o <user>
+# Modify an image attributes 
+$ euca - modify - image - attribute -l -r all < vm_id >
+# removing an VM bundle
+$ euca-deregister <vm_id >
+$ euca-delete -bundle -b <bucket_name>
+\end{verbatim}
+
+\subsubsection{Running the virtual machine}
+\label{sec:runn-virt-mach}
+\begin{verbatim}
+$ euca-run-instances [-t <type>] [ -n <numbers_of_instances>] <vm_id>
+#output:  ID of instance(s) (instance id)
+# Get the status of the instance (state and IP)
+$ euca-describe-instances  
+# terminate instance
+$ euca - terminate - instances < instanz_id >
+\end{verbatim}
+Note: This is NOT a complete guide, please refer to the euca2ools
+guide \cite{eucatools} on \url{http://open.eucalyptus.com/wiki/Euca2oolsGuide}.
+\subsection{Configuring and using Hybridfox}
+\label{sec:conf-hybr}
+Hybridfox is a Firefox Add-On, which provides a GUI for several tasks
+related with cloud computing. It can be downloaded from
+\url{http://code.google.com/p/hybridfox/}. 
+After installation it can be found in the Menu ,,Extras''.
+%At the first start it ask for the user credentials:
+We need to add an
+additional region before we can set up the credentials:%use Hybridfox
+                                %with the IBR-Cloud:
+\begin{center}
+\includegraphics{hybridfox_regions}
+\end{center}
+Now we setup the credentials:
+\begin{center}
+  \includegraphics{hybrid_creds}
+\end{center}
+Setting up images and instances is quite easy. More information
+concerning this, can be found in the the Hybridfox User Manual \cite{hybridfoxMan}
+\url{http://hybridfox.googlecode.com/files/Hybridfox_User_Manual_v1.pdf}
+
+\section{Creating images}
+\label{sec:creating-images}
+When we introduced the ,,glance'' command line tool for uploading
+images, we didn't explain how to 
 
 \end{document}
